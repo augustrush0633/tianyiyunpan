@@ -8,4 +8,5 @@ ty_password=天翼云盘密码
 export ty_username="账号1&账号2" && export ty_password="密码1&密码2" && export PUSHPLUS_TOKEN="推流token" && python3 /www/wwwroot/python/tianyiyun.py
 
 推流效果
-![Uploading image.png…]()
+
+<img width="410" height="767" alt="image" src="https://github.com/user-attachments/assets/53d6de06-ecb5-4126-b9f1-946accc223c9" />
