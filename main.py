@@ -29,7 +29,7 @@ if not ty_usernames or not ty_passwords:
 accounts = [{"username": u, "password": p} for u, p in zip(ty_usernames, ty_passwords)]
 
 # PushPlus配置
-PUSHPLUS_TOKEN = os.getenv("PUSHPLUS_TOKEN")
+SCKEY = os.getenv("SCKEY")
 
 def mask_phone(phone):
     """隐藏手机号中间四位"""
@@ -73,21 +73,21 @@ def rsa_encode(j_rsakey, string):
     return result
 
 def login(username, password):
-    print("🔄 正在执行登录流程...")
+    print("🔄 正在执行登录流程... - main.py:76")
     s = requests.Session()
     try:
         urlToken = "https://m.cloud.189.cn/udb/udb_login.jsp?pageId=1&pageKey=default&clientType=wap&redirectURL=https://m.cloud.189.cn/zhuanti/2021/shakeLottery/index.html"
         r = s.get(urlToken)
         match = re.search(r"https?://[^\s'\"]+", r.text)
         if not match:
-            print("❌ 错误：未找到动态登录页")
+            print("❌ 错误：未找到动态登录页 - main.py:83")
             return None
             
         url = match.group()
         r = s.get(url)
         match = re.search(r"<a id=\"j-tab-login-link\"[^>]*href=\"([^\"]+)\"", r.text)
         if not match:
-            print("❌ 错误：登录入口获取失败")
+            print("❌ 错误：登录入口获取失败 - main.py:90")
             return None
             
         href = match.group(1)
@@ -128,26 +128,26 @@ def login(username, password):
         )
         
         if r.json().get('result', 1) != 0:
-            print(f"❌ 登录错误：{r.json().get('msg')}")
+            print(f"❌ 登录错误：{r.json().get('msg')} - main.py:131")
             return None
             
         s.get(r.json()['toUrl'])
-        print("✅ 登录成功")
+        print("✅ 登录成功 - main.py:135")
         return s
         
     except Exception as e:
-        print(f"⚠️ 登录异常：{str(e)}")
+        print(f"⚠️ 登录异常：{str(e)} - main.py:139")
         return None
 
 def send_pushplus(msg):
-    if not PUSHPLUS_TOKEN:
-        print("⚠️ 未配置PushPlus，跳过消息推送")
+    if not SCKEY:
+        print("⚠️ 未配置PushPlus，跳过消息推送 - main.py:144")
         return
     
     url = "http://www.pushplus.plus/send"
     headers = {"Content-Type": "application/json"}
     data = {
-        "token": PUSHPLUS_TOKEN,
+        "token": SCKEY,
         "title": "天翼云盘签到完成",
         "content": msg,
         "template": "markdown"
@@ -157,14 +157,14 @@ def send_pushplus(msg):
         resp = requests.post(url, json=data, headers=headers, timeout=10)
         result = resp.json()
         if result.get('code') == 200:
-            print("✅ PushPlus消息推送成功")
+            print("✅ PushPlus消息推送成功 - main.py:160")
         else:
-            print(f"❌ PushPlus消息推送失败：{result.get('msg')}")
+            print(f"❌ PushPlus消息推送失败：{result.get('msg')} - main.py:162")
     except Exception as e:
-        print(f"❌ 推送异常：{str(e)}")
+        print(f"❌ 推送异常：{str(e)} - main.py:164")
 
 def main():
-    print("\n=============== 天翼云盘签到开始 ===============")
+    print("\n=============== 天翼云盘签到开始 =============== - main.py:167")
     all_results = []
     
     for acc in accounts:
@@ -173,7 +173,7 @@ def main():
         masked_phone = mask_phone(username)
         account_result = {"username": masked_phone, "sign": "", "lottery": ""}
         
-        print(f"\n🔔 处理账号：{masked_phone}")
+        print(f"\n🔔 处理账号：{masked_phone} - main.py:176")
         
         # 登录流程
         session = login(username, password)
@@ -213,7 +213,7 @@ def main():
             account_result["lottery"] = f"⚠️ {str(e)}"
         
         all_results.append(account_result)
-        print(f"  {account_result['sign']} | {account_result['lottery']}")
+        print(f"{account_result['sign']} | {account_result['lottery']} - main.py:216")
     
     # 生成汇总表格
     table = "### ⛅ 天翼云盘签到汇总\n\n"
@@ -224,7 +224,7 @@ def main():
     
     # 发送汇总推送
     send_pushplus(table)
-    print("\n✅ 所有账号处理完成！")
+    print("\n✅ 所有账号处理完成！ - main.py:227")
 
 if __name__ == "__main__":
     main()
